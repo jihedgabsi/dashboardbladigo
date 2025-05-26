@@ -8,20 +8,35 @@ interface LoginPageProps {
   error?: string;
 }
 
-// ✅ Fonction pour sauvegarder le token dans cookie ET localStorage
+// ✅ Fonction pour sauvegarder le token - avec vérification côté client
 const saveAdminToken = (token: string) => {
   try {
-    // Sauvegarder dans localStorage (comme avant)
-    localStorage.setItem('adminToken', token);
-    
-    // ✅ NOUVEAU : Sauvegarder dans un cookie pour le middleware
-    const maxAge = 7 * 24 * 60 * 60; // 7 jours en secondes
-    document.cookie = `adminToken=${token}; path=/; max-age=${maxAge}; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`;
-    
-    console.log('✅ Token sauvegardé dans localStorage et cookie');
+    // Vérifier si on est côté client avant d'utiliser localStorage
+    if (typeof window !== 'undefined') {
+      // Sauvegarder dans localStorage
+      localStorage.setItem('adminToken', token);
+      
+      // Sauvegarder dans un cookie pour le middleware
+      const maxAge = 7 * 24 * 60 * 60; // 7 jours en secondes
+      const isSecure = window.location.protocol === 'https:';
+      document.cookie = `adminToken=${token}; path=/; max-age=${maxAge}; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+      
+      console.log('✅ Token sauvegardé dans localStorage et cookie');
+    }
   } catch (error) {
     console.error('❌ Erreur lors de la sauvegarde du token:', error);
   }
+};
+
+// Fonction pour obtenir l'URL de l'API selon l'environnement
+const getApiUrl = () => {
+  if (typeof window !== 'undefined') {
+    // Côté client - utiliser l'URL relative en production, localhost en dev
+    return process.env.NODE_ENV === 'production' 
+      ? '/api/authadmin/login' 
+      : 'http://localhost:8000/api/authadmin/login';
+  }
+  return 'http://localhost:8000/api/authadmin/login';
 };
 
 const LoginPage = ({ onLogin, error: propError }: LoginPageProps) => {
@@ -36,7 +51,7 @@ const LoginPage = ({ onLogin, error: propError }: LoginPageProps) => {
     setLoading(true);
     setError('');
 
-    // Si une fonction onLogin est passée en prop, utilisez-la (peut-être pour un mock/story)
+    // Si une fonction onLogin est passée en prop, utilisez-la
     if (onLogin) {
       try {
         const success = await onLogin(email, password);
@@ -48,12 +63,20 @@ const LoginPage = ({ onLogin, error: propError }: LoginPageProps) => {
       } finally {
         setLoading(false);
       }
-      return; // Arrête le traitement si onLogin prop est utilisé
+      return;
     }
 
-    // --- Logique pour appeler le backend ---
+    // Vérifier qu'on est côté client
+    if (typeof window === 'undefined') {
+      setError('Erreur: Tentative de connexion côté serveur');
+      setLoading(false);
+      return;
+    }
+
+    // Logique pour appeler le backend
     try {
-      const response = await fetch('http://localhost:8000/api/authadmin/login', {
+      const apiUrl = getApiUrl();
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,16 +85,14 @@ const LoginPage = ({ onLogin, error: propError }: LoginPageProps) => {
       });
 
       if (response.ok) {
-        // ✅ Récupérer la réponse avec le token
         const data = await response.json();
         console.log('📥 Réponse login:', data);
         
-        // ✅ Vérifier si le token existe dans la réponse
         if (data.token) {
-          // Sauvegarder le token dans localStorage ET cookie
+          // Sauvegarder le token
           saveAdminToken(data.token);
           
-          // ✅ Redirection vers dashboard (le middleware prendra le relais)
+          // Redirection vers dashboard
           console.log('🔄 Redirection vers dashboard...');
           window.location.href = '/';
         } else {
@@ -79,8 +100,7 @@ const LoginPage = ({ onLogin, error: propError }: LoginPageProps) => {
           setError('Erreur: Token manquant dans la réponse');
         }
       } else {
-        // La réponse n'est pas OK (ex: 401 Unauthorized, 400 Bad Request)
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         console.error('❌ Erreur de connexion:', errorData);
         setError(errorData.message || 'Identifiants incorrects');
       }
@@ -176,8 +196,6 @@ const LoginPage = ({ onLogin, error: propError }: LoginPageProps) => {
             </button>
           </div>
         </form>
-
-     
       </div>
     </div>
   );
