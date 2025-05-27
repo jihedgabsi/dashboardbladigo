@@ -11,18 +11,25 @@ interface LoginPageProps {
 // ✅ Fonction pour sauvegarder le token dans cookie ET localStorage
 const saveAdminToken = (token: string) => {
   try {
-    // Sauvegarder dans localStorage (comme avant)
+    // Sauvegarder dans localStorage
     localStorage.setItem('adminToken', token);
+
+    // Sauvegarder dans un cookie lisible côté serveur
+    const maxAge = 7 * 24 * 60 * 60; // 7 jours
+    const isHttps = window.location.protocol === 'https:';
     
-    // ✅ NOUVEAU : Sauvegarder dans un cookie pour le middleware
-    const maxAge = 7 * 24 * 60 * 60; // 7 jours en secondes
-    document.cookie = `adminToken=${token}; path=/; max-age=${maxAge}; SameSite=Lax; Secure=${window.location.protocol === 'https:'}`;
-    
+    // Construction manuelle du cookie
+    let cookie = `adminToken=${token}; path=/; max-age=${maxAge}; SameSite=Lax;`;
+    if (isHttps) cookie += ' Secure;';
+
+    document.cookie = cookie;
+
     console.log('✅ Token sauvegardé dans localStorage et cookie');
   } catch (error) {
     console.error('❌ Erreur lors de la sauvegarde du token:', error);
   }
 };
+
 
 const LoginPage = ({ onLogin, error: propError }: LoginPageProps) => {
   const [email, setEmail] = useState('');
