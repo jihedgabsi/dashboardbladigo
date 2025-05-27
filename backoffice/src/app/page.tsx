@@ -62,7 +62,8 @@ const Home: React.FC = () => {
       case 'trajets':
         return <TrajetsPage onNavigate={handleNavigate} />;
       case 'ville':
-      return <VillePage onNavigate={handleNavigate} />;
+        return <VillePage onNavigate={handleNavigate} />;
+      case 'dashboard':
       default:
         return <DashboardHome onNavigate={handleNavigate} />;
     }
