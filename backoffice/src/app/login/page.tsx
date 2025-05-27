@@ -3,11 +3,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Truck } from 'lucide-react';
 
-interface LoginPageProps {
-  onLogin?: (email: string, password: string) => Promise<boolean>;
-  error?: string;
-}
-
 // ✅ Fonction pour sauvegarder le token dans cookie ET localStorage
 const saveAdminToken = (token: string) => {
   try {
@@ -24,32 +19,18 @@ const saveAdminToken = (token: string) => {
   }
 };
 
-const LoginPage = ({ onLogin, error: propError }: LoginPageProps) => {
+// ✅ Page component sans props (requis pour Next.js App Router)
+const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState(propError || '');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
-    // Si une fonction onLogin est passée en prop, utilisez-la (peut-être pour un mock/story)
-    if (onLogin) {
-      try {
-        const success = await onLogin(email, password);
-        if (!success) {
-          setError('Identifiants incorrects via onLogin prop');
-        }
-      } catch (err) {
-        setError('Erreur via onLogin prop');
-      } finally {
-        setLoading(false);
-      }
-      return; // Arrête le traitement si onLogin prop est utilisé
-    }
 
     // --- Logique pour appeler le backend ---
     try {
@@ -176,8 +157,6 @@ const LoginPage = ({ onLogin, error: propError }: LoginPageProps) => {
             </button>
           </div>
         </form>
-
-     
       </div>
     </div>
   );
