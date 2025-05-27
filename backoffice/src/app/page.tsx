@@ -9,6 +9,7 @@ import BagagesPage from '../components/BagagesPage';
 import DemandesPage from '../components/DemandesPage';
 import TrajetsPage from '../components/TrajetsPage';
 import VillePage from '../components/villePage';
+import WhatsupPage  from '../components/whatsup';
 import { DashboardView } from '../Types/index';
 
 // ✅ Fonction de déconnexion
@@ -63,6 +64,8 @@ const Home: React.FC = () => {
         return <TrajetsPage onNavigate={handleNavigate} />;
       case 'ville':
       return <VillePage onNavigate={handleNavigate} />;
+      case 'whatsapp':
+      return <WhatsupPage onNavigate={handleNavigate} />;
       default:
         return <DashboardHome onNavigate={handleNavigate} />;
     }
