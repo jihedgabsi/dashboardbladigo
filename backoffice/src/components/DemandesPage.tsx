@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Eye, CheckCircle, Clock, X, Edit, Trash2 } from 'lucide-react';
 
-
-interface DemandesPageProps {
-  onNavigate: (view: string) => void;
-}
-
-
-const DemandesPage: React.FC<DemandesPageProps> = ({ onNavigate }) => => {
+const DemandesPage = () => {
   const [demandes, setDemandes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
