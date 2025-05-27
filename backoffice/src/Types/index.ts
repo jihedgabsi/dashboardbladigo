@@ -86,8 +86,16 @@ export interface User {
     render?: (row: any) => React.ReactNode;
   }
   
-  // Types pour les vues du dashboard
-  export type DashboardView = 'dashboard' | 'users' | 'bagages' | 'demandes' | 'trajets' | 'logout';
+  // ✅ Types pour les vues du dashboard - CORRIGÉ avec toutes les valeurs utilisées
+  export type DashboardView = 
+    | 'dashboard' 
+    | 'users' 
+    | 'transporteurs'  // ✅ Ajouté - utilisé dans DashboardLayout
+    | 'bagages' 
+    | 'demandes' 
+    | 'trajets' 
+    | 'ville'          // ✅ Ajouté - utilisé dans DashboardLayout
+    | 'logout';
   
   // Types pour les filtres
   export interface Filter {
