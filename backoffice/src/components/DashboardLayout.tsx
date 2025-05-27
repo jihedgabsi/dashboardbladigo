@@ -12,7 +12,8 @@ import {
     X,
     Bell,
     Search,
-    Building2
+    Building2,
+    MessageCircle
 } from 'lucide-react';
 import NavItem from '@/components/NavItem';
 
@@ -99,6 +100,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, onNavigate,
                         onClick={() => onNavigate('ville')}
                     />
 
+                    <NavItem
+                        icon={<MessageCircle />}
+                        text="WhatsApp"
+                        active={currentView === 'whatsapp'}
+                        onClick={() => onNavigate('whatsapp')}
+                    />
+
                     <div className="border-t border-red-800 pt-4 mt-6">
                         <NavItem
                             icon={<LogOut />}
@@ -145,7 +153,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, onNavigate,
                         </div>
 
                         <div className="flex items-center">
-                           
                             <span className="ml-2 font-medium text-gray-700">Admin</span>
                         </div>
                     </div>
