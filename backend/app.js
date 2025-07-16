@@ -13,6 +13,8 @@ const trajectRoutes = require('./routes/trajectRoutes');
 const adminRoutes = require('./routes/authadminRoutes');
 const villeRoutes = require('./routes/villeRoutes');
 const statistiquedashboard = require('./routes/dashboardstat');
+const airportport = require('./routes/airportport');
+
 
 
 
@@ -40,6 +42,8 @@ app.use('/api/ville', villeRoutes);
 
 // Routes statistique
 app.use('/api/statistiquedashboard', statistiquedashboard);
+
+app.use('/api/airportport', airportport);
 
 //Routes admin
 
