@@ -1,4 +1,4 @@
-const Location = require('../airportport'); // Importation du modèle
+const Location = require('../models/airportport'); // Importation du modèle
 
 // Fonction pour récupérer les emplacements par mode de transport
 exports.getLocations = async (req, res) => {
