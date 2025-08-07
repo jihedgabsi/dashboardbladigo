@@ -54,7 +54,6 @@ const navLinks = [
     { view: 'ports', icon: <Ship className="w-5 h-5" />, text: 'Ports' },
     { view: 'ville', icon: <Building2 className="w-5 h-5" />, text: 'Ville' },
     { view: 'WhatsupPage', icon: <MessageCircle className="w-5 h-5" />, text: 'WhatsupPage' },
-
 ];
 
 interface DashboardLayoutProps {
@@ -90,6 +89,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, onNavigate,
         };
     }, [sidebarOpen]);
 
+    // CSS pour cacher la scrollbar
+    useEffect(() => {
+        const style = document.createElement('style');
+        style.textContent = `
+            .scrollbar-hide {
+                -ms-overflow-style: none;  /* Internet Explorer 10+ */
+                scrollbar-width: none;  /* Firefox */
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;  /* Safari and Chrome */
+            }
+        `;
+        document.head.appendChild(style);
+
+        return () => {
+            document.head.removeChild(style);
+        };
+    }, []);
+
     return (
         <div className="flex h-screen bg-gray-50 overflow-hidden">
             {/* Sidebar mobile overlay */}
@@ -123,7 +141,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, onNavigate,
                 </div>
 
                 {/* Navigation scrollable */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden" style={{ maxHeight: 'calc(100vh - 4rem)' }}>
+                <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide" style={{ maxHeight: 'calc(100vh - 4rem)' }}>
                     <nav className="px-3 py-4">
                         {/* Navigation principale */}
                         <div className="space-y-1 mb-6">
