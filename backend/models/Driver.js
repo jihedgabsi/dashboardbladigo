@@ -5,7 +5,6 @@ const DriverSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
     minlength: 3
   },
@@ -48,6 +47,10 @@ phoneNumber: {
     type: Date,
     default: null
   },
+  solde: {
+    type: Number,
+    default: 0
+  },
   roles: {
     type: [String],
     default: ['user']
@@ -55,7 +58,8 @@ phoneNumber: {
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  
 });
 
 // Pre-save middleware to hash password

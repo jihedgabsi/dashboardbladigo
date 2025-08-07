@@ -26,6 +26,12 @@ const demandeTransportSchema = new mongoose.Schema({
     default: 'pending',
     required: true,
   },
+  statusLivraison: {
+  type: String,
+  enum: ['pending', 'payé', 'collecté', 'aéroport_depart', 'aéroport_arrivée', 'en livraison', 'livré'],
+  default: 'pending',
+  required: false,
+},
   id_traject: {
      type: mongoose.Schema.Types.ObjectId,
      ref: 'Traject'
