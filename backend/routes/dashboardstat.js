@@ -5,12 +5,13 @@ const Driver = require('../models/Driver');
 const DemandeTransport = require('../models/DemandeTransport');
 const Traject = require('../models/Traject');
 const Baggage = require('../models/Baggage');
+const { protect, adminOnly } = require('../middleware/authadminMiddleware');
 
 /**
  * @route   GET /api/dashboard/chart-data
  * @desc    Get chart data for dashboard statistics over time
  */
-router.get('/chart-data', async (req, res) => {
+router.get('/chart-data',protect, adminOnly, async (req, res) => {
   try {
     const period = parseInt(req.query.period) || 7;
     if (![7, 14, 30].includes(period)) {
@@ -56,7 +57,7 @@ router.get('/chart-data', async (req, res) => {
  * @route   GET /api/dashboard/stats
  * @desc    Get dashboard statistics
  */
-router.get('/stats', async (req, res) => {
+router.get('/stats',protect, adminOnly, async (req, res) => {
   try {
     const [totalUsers, totalDrivers, demandesTransport, trajetsActifs] = await Promise.all([
       User.countDocuments(),
@@ -127,7 +128,7 @@ router.get('/stats', async (req, res) => {
  * @route   GET /api/dashboard/recent-demands
  * @desc    Get recent transport demands
  */
-router.get('/recent-demands', async (req, res) => {
+router.get('/recent-demands',protect, adminOnly, async (req, res) => {
   try {
     const { limit = 5 } = req.query;
     const recentDemands = await DemandeTransport.find()
@@ -167,7 +168,7 @@ router.get('/recent-demands', async (req, res) => {
  * @route   GET /api/dashboard/alerts
  * @desc    Get recent alerts/notifications
  */
-router.get('/alerts', async (req, res) => {
+router.get('/alerts', protect, adminOnly, async (req, res) => {
   try {
     const alerts = [];
     
@@ -268,7 +269,7 @@ router.get('/alerts', async (req, res) => {
  * @route   GET /api/dashboard/demand/:id
  * @desc    Get specific transport demand details
  */
-router.get('/demand/:id', async (req, res) => {
+router.get('/demand/:id', protect, adminOnly, async (req, res) => {
   try {
     const demand = await DemandeTransport.findById(req.params.id)
       .populate('id_user', 'username email phoneNumber')
@@ -291,7 +292,7 @@ router.get('/demand/:id', async (req, res) => {
  * @route   GET /api/dashboard/overview
  * @desc    Get complete dashboard overview
  */
-router.get('/overview', async (req, res) => {
+router.get('/overview', protect, adminOnly, async (req, res) => {
   try {
     const [stats, demands, alerts] = await Promise.all([
       getStatsData(),

@@ -14,6 +14,8 @@ const adminRoutes = require('./routes/authadminRoutes');
 const villeRoutes = require('./routes/villeRoutes');
 const statistiquedashboard = require('./routes/dashboardstat');
 const airportport = require('./routes/airportport');
+const commissionRoutes = require('./routes/commissionroutes.js');
+const historiquePaiementRoutes = require('./routes/historiquePaiementRoutes');
 
 
 
@@ -56,6 +58,8 @@ app.use('/api/driver', driverRoutes);
 
 // Routes trajet
 app.use('/api/trajets', trajectRoutes);
+app.use('/api/commission', commissionRoutes);
+app.use('/api/historique-paiements', historiquePaiementRoutes);
 
 
 // Error handling middleware
