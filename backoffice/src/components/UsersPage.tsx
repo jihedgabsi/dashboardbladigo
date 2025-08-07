@@ -57,7 +57,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ onNavigate }) => {
       setLoading(true);
       setError(null);
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://vokkkokcowo0wgsok88844wo.82.112.242.233.sslip.io/api/user/alldashboardusers', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/alldashboardusers`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ onNavigate }) => {
     try {
       setUpdateLoading(true);
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://vokkkokcowo0wgsok88844wo.82.112.242.233.sslip.io/api/user/${userId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ onNavigate }) => {
     
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://vokkkokcowo0wgsok88844wo.82.112.242.233.sslip.io/api/user/${userId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/${userId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -274,16 +274,16 @@ const UsersPage: React.FC<UsersPageProps> = ({ onNavigate }) => {
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input type="text" placeholder="Rechercher un utilisateur..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-64" />
+                <input type="text" placeholder="Rechercher un utilisateur..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-64 text-gray-400 mb-1.5" />
               </div>
               <div className="flex gap-2">
-                <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-400 mb-1.5">
                   <option value="all">Tous les rôles</option>
                   <option value="admin">Admin</option>
                   <option value="transporteur">Transporteur</option>
                   <option value="client">Client</option>
                 </select>
-                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-400 mb-1.5">
                   <option value="all">Tous les statuts</option>
                   <option value="actif">Vérifié</option>
                   <option value="en_attente">En attente</option>
@@ -421,7 +421,7 @@ const UsersPage: React.FC<UsersPageProps> = ({ onNavigate }) => {
       {editingUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-96 max-w-md">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 text-gray-500 mb-1.5">
               <h3 className="text-lg font-semibold">Modifier l'utilisateur</h3>
               <button onClick={() => setEditingUser(null)} className="text-gray-500 hover:text-gray-700">
                 <X className="w-5 h-5" />
@@ -430,15 +430,15 @@ const UsersPage: React.FC<UsersPageProps> = ({ onNavigate }) => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                <input type="text" value={editingUser.nom} onChange={(e) => setEditingUser({...editingUser, nom: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" />
+                <input type="text" value={editingUser.nom} onChange={(e) => setEditingUser({...editingUser, nom: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-500 mb-1.5" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" value={editingUser.email} onChange={(e) => setEditingUser({...editingUser, email: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" />
+                <input type="email" value={editingUser.email} onChange={(e) => setEditingUser({...editingUser, email: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-500 mb-1.5" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-                <input type="tel" value={editingUser.telephone || ''} onChange={(e) => setEditingUser({...editingUser, telephone: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" />
+                <input type="tel" value={editingUser.telephone || ''} onChange={(e) => setEditingUser({...editingUser, telephone: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-500 mb-1.5" />
               </div>
             </div>
             <div className="flex justify-end space-x-3 mt-6">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, ReactNode } from 'react';
+import React, { useState, ReactNode, useEffect } from 'react';
 import {
     Package,
     Users,
@@ -13,9 +13,49 @@ import {
     Bell,
     Search,
     Building2,
+    CreditCard,
+    Plane,
+    Ship,
+    Percent,
     MessageCircle
 } from 'lucide-react';
-import NavItem from '@/components/NavItem';
+
+const NavItem = ({ icon, text, active, onClick }: {
+    icon: ReactNode;
+    text: string;
+    active: boolean;
+    onClick: () => void;
+}) => (
+    <button
+        onClick={onClick}
+        className={`flex items-center w-full px-4 py-3 mt-1 text-sm font-medium text-left transition-all duration-200 rounded-lg focus:outline-none group ${active
+            ? 'bg-red-800 text-white shadow-lg'
+            : 'text-red-100 hover:bg-red-600 hover:text-white hover:shadow-md'
+        }`}
+    >
+        <div className={`transition-transform duration-200 ${active ? 'scale-110' : 'group-hover:scale-105'}`}>
+            {icon}
+        </div>
+        <span className="ml-3 font-medium">{text}</span>
+    </button>
+);
+
+const navLinks = [
+    { view: 'dashboard', icon: <Home className="w-5 h-5" />, text: 'Tableau de bord' },
+    { view: 'transporteurs', icon: <Truck className="w-5 h-5" />, text: 'Transporteurs' },
+    { view: 'users', icon: <Users className="w-5 h-5" />, text: 'Utilisateurs' },
+    { view: 'bagages', icon: <Package className="w-5 h-5" />, text: 'Bagages' },
+    { view: 'demandes', icon: <Truck className="w-5 h-5" />, text: 'Demandes' },
+    { view: 'trajets', icon: <Map className="w-5 h-5" />, text: 'Trajets' },
+    { view: 'commission', icon: <CreditCard className="w-5 h-5" />, text: 'Commission' },
+    { view: 'CommissionPage', icon: <Percent className="w-5 h-5" />, text: 'Gestion Commission' },
+    { view: 'HistoriquePaiementsPage', icon: <CreditCard className="w-5 h-5" />, text: 'Historique Paiements' },
+    { view: 'Airports', icon: <Plane className="w-5 h-5" />, text: 'Aéroports' },
+    { view: 'ports', icon: <Ship className="w-5 h-5" />, text: 'Ports' },
+    { view: 'ville', icon: <Building2 className="w-5 h-5" />, text: 'Ville' },
+    { view: 'WhatsupPage', icon: <MessageCircle className="w-5 h-5" />, text: 'WhatsupPage' },
+
+];
 
 interface DashboardLayoutProps {
     children: ReactNode;
@@ -27,140 +67,135 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, onNavigate,
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
     const [notifications, setNotifications] = useState<number>(3);
 
+    // Fermer la sidebar quand on clique sur un élément du menu sur mobile
+    const handleNavigate = (view: string) => {
+        onNavigate(view);
+        // Fermer automatiquement la sidebar sur mobile après navigation
+        if (window.innerWidth < 1024) {
+            setSidebarOpen(false);
+        }
+    };
+
+    // Empêcher le scroll du body quand la sidebar est ouverte sur mobile
+    useEffect(() => {
+        if (sidebarOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        
+        // Nettoyer au démontage du composant
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [sidebarOpen]);
+
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex h-screen bg-gray-50 overflow-hidden">
             {/* Sidebar mobile overlay */}
             {sidebarOpen && (
                 <div
-                    className="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden"
+                    className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden transition-opacity duration-300"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
             <div
-                className={`fixed inset-y-0 left-0 z-30 w-64 bg-red-700 text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                    }`}
+                className={`fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-red-700 to-red-800 text-white transform transition-transform duration-300 ease-out lg:translate-x-0 lg:static lg:inset-0 lg:w-64 ${
+                    sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                } shadow-2xl lg:shadow-lg flex flex-col`}
             >
-                <div className="flex items-center justify-between h-16 px-4 border-b border-red-800">
-                    <div className="flex items-center space-x-2">
-                        <Truck className="w-8 h-8" />
+                {/* Header de la sidebar */}
+                <div className="flex-shrink-0 flex items-center justify-between h-16 px-4 border-b border-red-600 bg-red-800 lg:bg-transparent">
+                    <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-white rounded-lg">
+                            <Truck className="w-6 h-6 text-red-700" />
+                        </div>
                         <span className="text-xl font-bold">Bladi Go</span>
                     </div>
                     <button
-                        className="p-1 rounded-md lg:hidden focus:outline-none focus:ring-2 focus:ring-white"
+                        className="p-2 rounded-lg lg:hidden focus:outline-none focus:ring-2 focus:ring-white/30 hover:bg-red-600 transition-colors duration-200"
                         onClick={() => setSidebarOpen(false)}
                     >
-                        <X className="w-6 h-6" />
+                        <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <nav className="mt-5 px-2">
-                    <NavItem
-                        icon={<Home />}
-                        text="Tableau de bord"
-                        active={currentView === 'dashboard'}
-                        onClick={() => onNavigate('dashboard')}
-                    />
-                    <NavItem
-                        icon={<Users />}
-                        text="Transporteurs"
-                        active={currentView === 'transporteurs'}
-                        onClick={() => onNavigate('transporteurs')}
-                    />
-                    <NavItem
-                        icon={<Users />}
-                        text="Utilisateurs"
-                        active={currentView === 'users'}
-                        onClick={() => onNavigate('users')}
-                    />
-                    <NavItem
-                        icon={<Package />}
-                        text="Bagages"
-                        active={currentView === 'bagages'}
-                        onClick={() => onNavigate('bagages')}
-                    />
-                    <NavItem
-                        icon={<Truck />}
-                        text="Demandes de transport"
-                        active={currentView === 'demandes'}
-                        onClick={() => onNavigate('demandes')}
-                    />
-                    <NavItem
-                        icon={<Map />}
-                        text="Trajets"
-                        active={currentView === 'trajets'}
-                        onClick={() => onNavigate('trajets')}
-                    />
+                {/* Navigation scrollable */}
+                <div className="flex-1 overflow-y-auto overflow-x-hidden" style={{ maxHeight: 'calc(100vh - 4rem)' }}>
+                    <nav className="px-3 py-4">
+                        {/* Navigation principale */}
+                        <div className="space-y-1 mb-6">
+                            {navLinks.map((link) => (
+                                <NavItem
+                                    key={link.view}
+                                    icon={link.icon}
+                                    text={link.text}
+                                    active={currentView === link.view}
+                                    onClick={() => handleNavigate(link.view)}
+                                />
+                            ))}
+                        </div>
 
-                    <NavItem
-                        icon={<Building2 />}
-                        text="Ville"
-                        active={currentView === 'ville'}
-                        onClick={() => onNavigate('ville')}
-                    />
+                        {/* Séparateur et déconnexion */}
+                        <div className="border-t border-red-600/50 pt-4">
+                            <NavItem
+                                icon={<LogOut className="w-5 h-5" />}
+                                text="Déconnexion"
+                                active={false}
+                                onClick={() => handleNavigate('logout')}
+                            />
+                        </div>
 
-                    <NavItem
-                        icon={<MessageCircle />}
-                        text="WhatsApp"
-                        active={currentView === 'whatsapp'}
-                        onClick={() => onNavigate('whatsapp')}
-                    />
-
-                    <div className="border-t border-red-800 pt-4 mt-6">
-                        <NavItem
-                            icon={<LogOut />}
-                            text="Déconnexion"
-                            onClick={() => onNavigate('logout')}
-                        />
-                    </div>
-                </nav>
+                        {/* Espace de sécurité en bas pour s'assurer que tout est visible */}
+                        <div className="h-8 lg:h-4"></div>
+                    </nav>
+                </div>
             </div>
 
-            {/* Main Content */}
-            <div className="flex flex-col flex-1 overflow-hidden">
-                {/* Top Header */}
-                <header className="flex items-center justify-between h-16 px-6 bg-white border-b border-gray-200">
-                    <div className="flex items-center">
+            {/* Contenu principal */}
+            <div className="flex flex-col flex-1 overflow-hidden min-w-0">
+                {/* Header supérieur */}
+                <header className="flex items-center justify-between h-16 px-4 sm:px-6 bg-white border-b border-gray-200 shadow-sm z-30">
+                    <div className="flex items-center min-w-0 flex-1">
                         <button
-                            className="p-1 mr-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 lg:hidden"
+                            className="p-2 mr-3 text-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 lg:hidden hover:bg-gray-100 transition-colors duration-200"
                             onClick={() => setSidebarOpen(true)}
                         >
                             <Menu className="w-6 h-6" />
                         </button>
-                        <div className="relative">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                                <Search className="w-5 h-5 text-gray-400" />
-                            </span>
-                            <input
-                                type="text"
-                                placeholder="Rechercher..."
-                                className="py-2 pl-10 pr-4 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                            />
-                        </div>
+                        
+                        
                     </div>
 
-                    <div className="flex items-center">
-                        <div className="relative mr-4">
-                            <button className="relative p-1 text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    {/* Section droite du header */}
+                    <div className="flex items-center space-x-4">
+                        <div className="relative">
+                            <button className="relative p-2 text-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 hover:bg-gray-100 transition-colors duration-200">
                                 <Bell className="w-6 h-6" />
                                 {notifications > 0 && (
-                                    <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
-                                        {notifications}
+                                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse">
+                                        {notifications > 9 ? '9+' : notifications}
                                     </span>
                                 )}
                             </button>
                         </div>
 
-                        <div className="flex items-center">
-                            <span className="ml-2 font-medium text-gray-700">Admin</span>
+                        <div className="hidden sm:flex items-center space-x-2">
+                            <div className="w-8 h-8 bg-red-700 rounded-full flex items-center justify-center">
+                                <span className="text-white font-semibold text-sm">A</span>
+                            </div>
+                            <span className="text-sm font-medium text-gray-700">Admin</span>
                         </div>
                     </div>
                 </header>
 
-                {/* Page Content */}
-                <main className="flex-1 overflow-y-auto bg-gray-100 p-4">
-                    {children}
+                {/* Contenu de la page */}
+                <main className="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6">
+                    <div className="mx-auto max-w-7xl">
+                        {children}
+                    </div>
                 </main>
             </div>
         </div>

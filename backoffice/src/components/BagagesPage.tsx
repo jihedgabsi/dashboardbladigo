@@ -48,7 +48,7 @@ const BagagesPage: React.FC<BagagesPageProps> = ({ onNavigate }) => {
       setLoading(true);
 
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://vokkkokcowo0wgsok88844wo.82.112.242.233.sslip.io/api/baggage', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/baggage`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ const BagagesPage: React.FC<BagagesPageProps> = ({ onNavigate }) => {
     try {
 
         const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://vokkkokcowo0wgsok88844wo.82.112.242.233.sslip.io/api/baggage/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/baggage/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -214,7 +214,7 @@ const BagagesPage: React.FC<BagagesPageProps> = ({ onNavigate }) => {
                   placeholder="Rechercher par ID ou description..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-64"
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-64 text-gray-400 mb-1.5"
                 />
               </div>
             </div>

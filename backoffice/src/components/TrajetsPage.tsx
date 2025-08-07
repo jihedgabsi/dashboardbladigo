@@ -46,7 +46,7 @@ const TrajetsPage: React.FC<TrajetsPageProps> = ({ onNavigate }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://vokkkokcowo0wgsok88844wo.82.112.242.233.sslip.io/api/trajets', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trajets`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -71,7 +71,7 @@ const TrajetsPage: React.FC<TrajetsPageProps> = ({ onNavigate }) => {
   const updateTrajet = async (id: string, data: Partial<TrajetAPI>) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://vokkkokcowo0wgsok88844wo.82.112.242.233.sslip.io/api/trajets/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trajets/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ const TrajetsPage: React.FC<TrajetsPageProps> = ({ onNavigate }) => {
   const deleteTrajet = async (id: string) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://vokkkokcowo0wgsok88844wo.82.112.242.233.sslip.io/api/trajets/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trajets/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -319,14 +319,14 @@ const TrajetsPage: React.FC<TrajetsPageProps> = ({ onNavigate }) => {
                   placeholder="Rechercher un trajet..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-64"
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-64 text-gray-400 mb-1.5"
                 />
               </div>
               
               <select
                 value={filterTransport}
                 onChange={(e) => setFilterTransport(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-400 mb-1.5"
               >
                 <option value="all">Tous les transports</option>
                 <option value="Avion">Avion</option>
@@ -456,7 +456,7 @@ const TrajetsPage: React.FC<TrajetsPageProps> = ({ onNavigate }) => {
       {showEditModal && selectedTrajet && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 text-gray-500 mb-1.5">
               <h3 className="text-lg font-semibold">Modifier le trajet</h3>
               <button 
                 onClick={() => setShowEditModal(false)}
@@ -467,9 +467,9 @@ const TrajetsPage: React.FC<TrajetsPageProps> = ({ onNavigate }) => {
             </div>
             
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 text-gray-500 mb-1.5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Prix/kg (DT)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 ">Prix/kg (DT)</label>
                   <input
                     type="number"
                     value={editForm.prixParKilo || ''}
@@ -491,11 +491,11 @@ const TrajetsPage: React.FC<TrajetsPageProps> = ({ onNavigate }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mode de transport</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 ">Mode de transport</label>
                 <select
                   value={editForm.modetransport || ''}
                   onChange={(e) => setEditForm({...editForm, modetransport: e.target.value})}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500"
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 text-gray-500 mb-1.5"
                 >
                   <option value="Avion">Avion</option>
                   <option value="Bateau">Bateau</option>
@@ -510,7 +510,7 @@ const TrajetsPage: React.FC<TrajetsPageProps> = ({ onNavigate }) => {
                   type="date"
                   value={editForm.dateTraject || ''}
                   onChange={(e) => setEditForm({...editForm, dateTraject: e.target.value})}
-                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500"
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 text-gray-500 mb-1.5"
                 />
               </div>
               
@@ -521,7 +521,7 @@ const TrajetsPage: React.FC<TrajetsPageProps> = ({ onNavigate }) => {
                     type="text"
                     value={editForm.portDepart || ''}
                     onChange={(e) => setEditForm({...editForm, portDepart: e.target.value})}
-                    className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500"
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 text-gray-500 mb-1.5"
                   />
                 </div>
                 <div>
@@ -530,7 +530,7 @@ const TrajetsPage: React.FC<TrajetsPageProps> = ({ onNavigate }) => {
                     type="text"
                     value={editForm.portDarriver || ''}
                     onChange={(e) => setEditForm({...editForm, portDarriver: e.target.value})}
-                    className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500"
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 text-gray-500 mb-1.5"
                   />
                 </div>
               </div>

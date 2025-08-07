@@ -60,7 +60,7 @@ const CitiesPage: React.FC<CitiesPageProps> = ({ onNavigate }) => {
       setLoading(true);
       setError(null);
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://vokkkokcowo0wgsok88844wo.82.112.242.233.sslip.io/api/ville', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ville`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ const CitiesPage: React.FC<CitiesPageProps> = ({ onNavigate }) => {
     try {
       setUpdateLoading(true);
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://vokkkokcowo0wgsok88844wo.82.112.242.233.sslip.io/api/ville', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ville`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ const CitiesPage: React.FC<CitiesPageProps> = ({ onNavigate }) => {
     try {
       setUpdateLoading(true);
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://vokkkokcowo0wgsok88844wo.82.112.242.233.sslip.io/api/ville/${cityId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ville/${cityId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ const CitiesPage: React.FC<CitiesPageProps> = ({ onNavigate }) => {
     
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://vokkkokcowo0wgsok88844wo.82.112.242.233.sslip.io/api/ville/${cityId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ville/${cityId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -244,7 +244,7 @@ const CitiesPage: React.FC<CitiesPageProps> = ({ onNavigate }) => {
         </div>
       )}
 
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 flex justify-between items-center text-gray-400 mb-1.5">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Gestion des villes</h1>
           <p className="text-gray-600">Gérez toutes les villes de la plateforme</p>
@@ -252,14 +252,14 @@ const CitiesPage: React.FC<CitiesPageProps> = ({ onNavigate }) => {
         <div className="flex space-x-3">
           <button 
             onClick={() => setAddingCity(true)} 
-            className="bg-red-600 text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-red-700 transition-colors duration-200"
+            className="bg-red-600 text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-red-700 transition-colors duration-200 text-gray-400 mb-1.5"
           >
             <Plus className="w-4 h-4" />
             <span>Ajouter une ville</span>
           </button>
           <button 
             onClick={fetchCities} 
-            className="bg-gray-600 text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-gray-700 transition-colors duration-200"
+            className="bg-gray-600 text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-gray-700 transition-colors duration-200 text-gray-400 mb-1.5"
           >
             <RefreshCw className="w-4 h-4" />
             <span>Actualiser</span>
@@ -314,14 +314,14 @@ const CitiesPage: React.FC<CitiesPageProps> = ({ onNavigate }) => {
                   placeholder="Rechercher une ville..." 
                   value={searchTerm} 
                   onChange={(e) => setSearchTerm(e.target.value)} 
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-64" 
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-64 text-gray-400 mb-1.5" 
                 />
               </div>
               <div className="flex gap-2">
                 <select 
                   value={filterCountry} 
                   onChange={(e) => setFilterCountry(e.target.value)} 
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-400 mb-1.5"
                 >
                   <option value="all">Tous les pays</option>
                   {uniqueCountries.map(country => (
@@ -495,7 +495,7 @@ const CitiesPage: React.FC<CitiesPageProps> = ({ onNavigate }) => {
 
       {/* Modal d'ajout */}
       {addingCity && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 text-gray-400 mb-1.5">
           <div className="bg-white p-6 rounded-lg w-96 max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Ajouter une ville</h3>
@@ -510,7 +510,7 @@ const CitiesPage: React.FC<CitiesPageProps> = ({ onNavigate }) => {
                   type="text" 
                   value={newCity.nom} 
                   onChange={(e) => setNewCity({...newCity, nom: e.target.value})} 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-400 mb-1.5" 
                   placeholder="Entrez le nom de la ville"
                 />
               </div>
@@ -519,7 +519,7 @@ const CitiesPage: React.FC<CitiesPageProps> = ({ onNavigate }) => {
                 <select 
                   value={newCity.pays} 
                   onChange={(e) => setNewCity({...newCity, pays: e.target.value})} 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-400 mb-1.5"
                 >
                   <option value="">Sélectionnez un pays</option>
                   {availableCountries.map(country => (
