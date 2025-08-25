@@ -197,12 +197,7 @@ exports.payerpartiedecommission = async (req, res) => {
       return res.status(404).json({ message: 'Chauffeur non trouvé.' });
     }
 
-    if (driver.solde < amount) {
-      return res.status(400).json({
-        message: `Paiement refusé. Le solde (${driver.solde}) est insuffisant pour payer ${amount}.`
-      });
-    }
-
+   
     // --- 3. Enregistrement de l'historique de paiement ---
     const nouvelHistorique = new HistoriquePaiement({
       id_driver: driverId,
@@ -213,7 +208,7 @@ exports.payerpartiedecommission = async (req, res) => {
     // --- 4. Mise à jour du solde du chauffeur ---
     const updatedDriver = await Driver.findByIdAndUpdate(
       driverId,
-      { $inc: { solde: -amount } }, // $inc soustrait la valeur de 'amount' du solde
+      { $inc: { solde: +amount } }, // $inc soustrait la valeur de 'amount' du solde
       { new: true, select: 'username email solde' } // 'new: true' retourne le document mis à jour
     );
 
@@ -227,5 +222,5 @@ exports.payerpartiedecommission = async (req, res) => {
     // Gestion des erreurs générales
     res.status(500).json({ message: 'Erreur serveur lors du paiement.', error: error.message });
   }
-
 };
+
