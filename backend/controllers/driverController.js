@@ -6,28 +6,12 @@ const Commission = require('../models/Commission');
 // === Obtenir tous les chauffeurs pour le dashboard
 exports.getAllDashboardDrivers = async (req, res) => {
   try {
-    // 1. Récupérer la commission la plus récente
-    const commissionDoc = await Commission.findOne().sort({ updatedAt: -1 });
-    const commissionPercentage = commissionDoc ? commissionDoc.valeur : 10; // ex: 10%
-
-    // 2. Récupérer les chauffeurs
+    // 1. Récupérer les chauffeurs avec les champs souhaités
     const drivers = await Driver.find({}, 'username email phoneNumber solde isVerified createdAt').lean();
 
-    // 3. Transformer les données pour calculer le MONTANT de la commission
-    const driversWithCommissionAmount = drivers.map(driver => {
-      const soldeBrut = driver.solde;
-      
-      // Calculer le montant de la commission à prélever
-      const commissionAmount = soldeBrut * (commissionPercentage / 100);
-
-      // Renvoyer un nouvel objet où 'solde' contient maintenant le montant de la commission
-      return {
-        ...driver,
-        solde: parseFloat(commissionAmount.toFixed(2)) // On remplace le solde par le montant de la commission
-      };
-    });
-
-    res.status(200).json(driversWithCommissionAmount);
+    // 2. Renvoyer directement la liste des chauffeurs
+    // Le champ 'solde' contient maintenant le solde réel du chauffeur, et non un montant de commission.
+    res.status(200).json(drivers);
 
   } catch (err) {
     res.status(500).json({ message: 'Erreur lors de la récupération des chauffeurs', error: err.message });
@@ -243,4 +227,5 @@ exports.payerpartiedecommission = async (req, res) => {
     // Gestion des erreurs générales
     res.status(500).json({ message: 'Erreur serveur lors du paiement.', error: error.message });
   }
+
 };
