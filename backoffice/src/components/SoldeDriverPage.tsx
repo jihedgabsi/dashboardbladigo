@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, User, RefreshCw, X, Search, CheckCircle, Phone } from 'lucide-react';
+import { Wallet, User, RefreshCw, X, Search, CheckCircle, PlusCircle } from 'lucide-react';
 
 // Interface pour les données du chauffeur reçues de l'API
 interface ApiDriver {
@@ -7,7 +7,7 @@ interface ApiDriver {
   username: string;
   email: string;
   solde: number;
-  phoneNumber?: string; // Ajout du numéro de téléphone (optionnel)
+  phoneNumber?: string;
 }
 
 // Interface pour les données affichées dans le composant
@@ -15,7 +15,7 @@ interface DisplayDriver {
   id: string;
   nom: string;
   email: string;
-  phoneNumber: string; // Numéro de téléphone à afficher
+  phoneNumber: string;
   solde: number;
 }
 
@@ -30,13 +30,15 @@ const SoldeDriverPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedDriver, setSelectedDriver] = useState<DisplayDriver | null>(null);
   const [updateLoading, setUpdateLoading] = useState<boolean>(false);
+  // NOUVEL ÉTAT POUR LE MONTANT À AJOUTER
+  const [paymentAmount, setPaymentAmount] = useState<string>('');
 
   // Transformation des données de l'API pour l'affichage
   const transformApiDriver = (apiDriver: ApiDriver): DisplayDriver => ({
     id: apiDriver._id,
     nom: apiDriver.username,
     email: apiDriver.email,
-    phoneNumber: apiDriver.phoneNumber || 'N/A', // Transformation avec une valeur par défaut
+    phoneNumber: apiDriver.phoneNumber || 'N/A',
     solde: apiDriver.solde || 0,
   });
 
@@ -74,7 +76,7 @@ const SoldeDriverPage: React.FC = () => {
     fetchDrivers();
   }, []);
 
-  // Mise à jour du filtre pour inclure la recherche par numéro de téléphone
+  // Mise à jour du filtre
   useEffect(() => {
     const results = drivers.filter(driver =>
       driver.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -86,32 +88,42 @@ const SoldeDriverPage: React.FC = () => {
 
   const openPaymentModal = (driver: DisplayDriver) => {
     setSelectedDriver(driver);
+    setPaymentAmount(''); // Réinitialiser le champ à chaque ouverture
     setIsModalOpen(true);
   };
 
   const closePaymentModal = () => {
     setIsModalOpen(false);
     setSelectedDriver(null);
+    setPaymentAmount('');
   };
 
-  // FONCTION UNIQUE POUR GÉRER LE PAIEMENT COMPLET
-  const handlePayCommission = async () => {
-    if (!selectedDriver || selectedDriver.solde <= 0) return;
+  // FONCTION MODIFIÉE POUR AJOUTER UN MONTANT SPÉCIFIQUE
+  const handleAddAmount = async () => {
+    if (!selectedDriver || !paymentAmount || isNaN(parseFloat(paymentAmount))) {
+      alert("Veuillez entrer un montant valide.");
+      return;
+    }
 
     setUpdateLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/driver/${selectedDriver.id}/payercommissioncomplette`, {
+      const amountToAdd = parseFloat(paymentAmount);
+      
+      // ATTENTION : Assurez-vous que cette URL correspond à votre API backend
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/driver/${selectedDriver.id}/ajsolde`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
+        // On envoie le montant dans le corps de la requête
+        body: JSON.stringify({ amount: amountToAdd }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Le paiement complet a échoué.');
+        throw new Error(errorData.message || "L'opération a échoué.");
       }
       
       await fetchDrivers(); // Rafraîchir les données
@@ -123,7 +135,7 @@ const SoldeDriverPage: React.FC = () => {
     }
   };
   
-  // Le reste du composant (affichage de la table, etc.)
+  // Le reste du composant (affichage, etc.) reste inchangé...
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -147,11 +159,11 @@ const SoldeDriverPage: React.FC = () => {
         </div>
       )}
 
-      {/* Header, barre de recherche, etc. (inchangé) */}
+      {/* Header, barre de recherche, etc. */}
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Gestion des Paiements</h1>
-          <p className="text-gray-600">Payez les commissions de vos transporteurs.</p>
+          <h1 className="text-2xl font-bold text-gray-800">Gestion des Soldes Chauffeurs</h1>
+          <p className="text-gray-600">Consultez et ajustez les soldes de vos transporteurs.</p>
         </div>
         <button onClick={fetchDrivers} className="bg-gray-600 text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-gray-700 transition-colors duration-200 ">
           <RefreshCw className="w-4 h-4" />
@@ -180,7 +192,7 @@ const SoldeDriverPage: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transporteur</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Téléphone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commission à Payer</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solde Actuel</th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -199,17 +211,16 @@ const SoldeDriverPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{driver.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{driver.phoneNumber}</td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${driver.solde > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${driver.solde < 0 ? 'text-red-600' : 'text-green-600'}`}>
                     {driver.solde.toFixed(2)} €
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <button 
                       onClick={() => openPaymentModal(driver)}
-                      className="bg-red-500 text-white px-4 py-2 rounded-md flex items-center justify-center mx-auto space-x-2 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
-                      disabled={driver.solde <= 0}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-md flex items-center justify-center mx-auto space-x-2 hover:bg-blue-600 transition-colors text-sm"
                     >
-                      <Wallet className="w-4 h-4" />
-                      <span>Effectuer un Paiement</span>
+                      <PlusCircle className="w-4 h-4" />
+                      <span>Ajuster Solde</span>
                     </button>
                   </td>
                 </tr>
@@ -224,41 +235,53 @@ const SoldeDriverPage: React.FC = () => {
         </div>
       </div>
 
-      {/* MODAL DE PAIEMENT SIMPLIFIÉ */}
+      {/* MODAL MODIFIÉE POUR AJOUTER UN MONTANT */}
       {isModalOpen && selectedDriver && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Payer la commission de {selectedDriver.nom}</h3>
+              <h3 className="text-lg font-semibold text-gray-800">Ajuster le solde de {selectedDriver.nom}</h3>
               <button onClick={closePaymentModal} className="text-gray-500 hover:text-gray-800">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="text-center bg-gray-100 p-3 rounded-md mb-6">
-              <p className="text-sm text-gray-600">Commission totale à payer</p>
-              <p className="text-2xl font-bold text-red-600">{selectedDriver.solde.toFixed(2)} €</p>
-            </div>
-
-            <div className="space-y-4 text-center">
-              <p className="text-gray-700">
-                Vous allez régler la totalité de la commission due. Le solde du transporteur sera mis à zéro.
+            <div className="bg-gray-100 p-3 rounded-md mb-4 text-center">
+              <p className="text-sm text-gray-600">Solde actuel</p>
+              <p className={`text-2xl font-bold ${selectedDriver.solde < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                {selectedDriver.solde.toFixed(2)} €
               </p>
-              <div className="flex justify-end mt-4">
-                <button 
-                  onClick={handlePayCommission} 
-                  disabled={updateLoading} 
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed w-full justify-center"
-                >
-                  {updateLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
-                  <CheckCircle className="w-4 h-4" />
-                  <span>Confirmer le Paiement Complet</span>
-                </button>
-              </div>
             </div>
 
-            <div className="flex justify-start mt-6 pt-4 border-t">
+            {/* CHAMP DE SAISIE POUR LE MONTANT */}
+            <div className="mb-6">
+                <label htmlFor="paymentAmount" className="block text-sm font-medium text-gray-700 mb-1">
+                    Montant à ajouter (ex: 2 pour ajouter, -2 pour retirer)
+                </label>
+                <div className="relative">
+                    <input
+                        type="number"
+                        id="paymentAmount"
+                        value={paymentAmount}
+                        onChange={(e) => setPaymentAmount(e.target.value)}
+                        placeholder="0.00"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+                    />
+                     <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">€</span>
+                </div>
+            </div>
+
+            <div className="flex justify-end space-x-3">
               <button onClick={closePaymentModal} className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">
                 Annuler
+              </button>
+              <button 
+                onClick={handleAddAmount} 
+                disabled={updateLoading || !paymentAmount} 
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {updateLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
+                <CheckCircle className="w-4 h-4" />
+                <span>Confirmer l'opération</span>
               </button>
             </div>
           </div>
