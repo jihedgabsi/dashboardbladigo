@@ -22,6 +22,7 @@ router.put('/update-password', protect, adminOnly, updateDriverPassword); // Uti
 router.delete('/:id', protect, adminOnly, deleteDriverById);
 router.put('/:id/solde', protect, adminOnly, updateDriverSolde);
 router.put('/:id/payercommissioncomplette', protect, adminOnly, payercommissioncomplette);
-router.put('/:id/payerpartiedecommission', protect, adminOnly, payerpartiedecommission);
+router.put('/:id/payerpartiedecommission', protect, adminOnly, ajsolde);
 
 module.exports = router;
+
