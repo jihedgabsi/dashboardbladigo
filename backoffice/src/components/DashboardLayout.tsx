@@ -47,8 +47,8 @@ const navLinks = [
     { view: 'bagages', icon: <Package className="w-5 h-5" />, text: 'Bagages' },
     { view: 'demandes', icon: <Truck className="w-5 h-5" />, text: 'Demandes' },
     { view: 'trajets', icon: <Map className="w-5 h-5" />, text: 'Trajets' },
-    { view: 'commission', icon: <CreditCard className="w-5 h-5" />, text: 'Commission' },
-    { view: 'CommissionPage', icon: <Percent className="w-5 h-5" />, text: 'Gestion Commission' },
+    { view: 'commission', icon: <CreditCard className="w-5 h-5" />, text: 'Solde Transporteurs' },
+    { view: 'CommissionPage', icon: <Percent className="w-5 h-5" />, text: 'Gestion des frais' },
     { view: 'HistoriquePaiementsPage', icon: <CreditCard className="w-5 h-5" />, text: 'Historique Paiements' },
     { view: 'Airports', icon: <Plane className="w-5 h-5" />, text: 'Aéroports' },
     { view: 'ports', icon: <Ship className="w-5 h-5" />, text: 'Ports' },
@@ -221,3 +221,4 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, onNavigate,
 };
 
 export default DashboardLayout;
+
