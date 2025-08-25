@@ -114,7 +114,7 @@ const CommissionPage: React.FC = () => {
     return (
         <div className="max-w-2xl mx-auto p-4 md:p-6">
             <div className="bg-white p-8 rounded-xl shadow-md border border-gray-200">
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">Gestion de la Commission ⚙️</h1>
+                <h1 className="text-3xl font-bold text-gray-800 mb-2">Gestion de la Frais ⚙️</h1>
                 <p className="text-gray-500 mb-6">Modifiez la commission globale et le seuil minimum de l'application.</p>
 
                 <form onSubmit={handleUpdate}>
@@ -122,7 +122,7 @@ const CommissionPage: React.FC = () => {
                         {/* Champ pour la valeur de la commission */}
                         <div>
                             <label htmlFor="valeur" className="block text-sm font-medium text-gray-700 mb-1">
-                                Taux de commission (%)
+                                Taux de Frais (%)
                             </label>
                             <div className="relative">
                                 <input
@@ -140,7 +140,7 @@ const CommissionPage: React.FC = () => {
                         {/* Champ pour la commission minimum */}
                         <div>
                             <label htmlFor="comissionmin" className="block text-sm font-medium text-gray-700 mb-1">
-                                Commission minimum (en dinar ou devise)
+                                Solde minimum (EUR)
                             </label>
                             <input
                                 type="text"
