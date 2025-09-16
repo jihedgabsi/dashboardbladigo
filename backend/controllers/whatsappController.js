@@ -5,6 +5,7 @@ let whatsappScanQR = null;
 let isWhatsAppConnected = false;
 let isClientInitialized = false;
 
+// ⚡ Client WhatsApp
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
@@ -13,16 +14,25 @@ const client = new Client({
     }
 });
 
+// 🔹 QR Code
 client.on('qr', async (qr) => {
-    console.log('QR Code reçu:', qr);
-    whatsappScanQR = await qrcode.toDataURL(qr);
+    try {
+        console.log('QR Code reçu:', qr);
+        whatsappScanQR = await qrcode.toDataURL(qr);
+    } catch (err) {
+        console.error('Erreur lors de la génération du QR Code:', err);
+        whatsappScanQR = null;
+    }
 });
 
+// 🔹 Connexion réussie
 client.on('ready', () => {
     console.log('✅ WhatsApp Web connecté !');
     isWhatsAppConnected = true;
+    isClientInitialized = false; // On réinitialise pour permettre un futur restart si déconnecté
 });
 
+// 🔹 Déconnexion
 client.on('disconnected', (reason) => {
     console.log('❌ Déconnecté de WhatsApp:', reason);
     isWhatsAppConnected = false;
@@ -30,7 +40,7 @@ client.on('disconnected', (reason) => {
     whatsappScanQR = null;
 });
 
-// 🚀 Démarrer WhatsApp Web
+// 🚀 Démarrer WhatsApp
 exports.startWhatsApp = async (req, res) => {
     if (isWhatsAppConnected) {
         return res.json({ success: true, message: "✅ WhatsApp est déjà connecté." });
@@ -38,12 +48,14 @@ exports.startWhatsApp = async (req, res) => {
     if (isClientInitialized) {
         return res.json({ success: true, message: "🕒 WhatsApp est en cours de connexion..." });
     }
+
     try {
-        client.initialize();
+        await client.initialize();
         isClientInitialized = true;
         res.json({ success: true, message: "🚀 WhatsApp en cours de démarrage..." });
     } catch (err) {
         console.error("Erreur lors de l'initialisation de WhatsApp:", err);
+        isClientInitialized = false;
         res.status(500).json({ error: "❌ Échec de l'initialisation de WhatsApp." });
     }
 };
@@ -51,7 +63,7 @@ exports.startWhatsApp = async (req, res) => {
 // 🔹 Obtenir le QR Code
 exports.getQRCode = (req, res) => {
     if (!whatsappScanQR) {
-        return res.status(500).json({ error: "QR Code non disponible. Démarrez WhatsApp avec POST /whatsapp/start" });
+        return res.status(404).json({ error: "QR Code non disponible. Démarrez WhatsApp avec POST /whatsapp/start" });
     }
     res.json({ qrCode: whatsappScanQR });
 };
@@ -65,6 +77,7 @@ exports.sendMessage = async (req, res) => {
     if (!isWhatsAppConnected) {
         return res.status(403).json({ error: "WhatsApp n'est pas connecté. Veuillez scanner le QR Code." });
     }
+
     try {
         await client.sendMessage(`${phone}@c.us`, message);
         res.json({ success: true, message: `Message envoyé à ${phone}` });
@@ -84,6 +97,7 @@ exports.logoutWhatsApp = async (req, res) => {
     if (!isWhatsAppConnected) {
         return res.json({ success: false, message: "WhatsApp n'est pas connecté." });
     }
+
     try {
         await client.logout();
         isWhatsAppConnected = false;
