@@ -114,11 +114,11 @@ exports.sendMessage = async (req, res) => {
   }
 
   try {
-    // ✅ format du numéro
-    const cleanPhone = phone.replace(/\D/g, ""); // supprime espaces, +, etc.
+    // format international (ex: 21699999999 sans +)
+    const cleanPhone = phone.replace(/\D/g, "");
     const chatId = `${cleanPhone}@c.us`;
 
-    await client.sendMessage(chatId, message);
+    await client.sendMessage(chatId, message); // ✅ sans options
 
     res.json({ success: true, message: `Message envoyé à ${phone}` });
   } catch (error) {
@@ -126,6 +126,7 @@ exports.sendMessage = async (req, res) => {
     res.status(500).json({ error: "Erreur lors de l'envoi du message." });
   }
 };
+
 
 exports.getStatus = (req, res) => {
   res.json({ isConnected: isWhatsAppConnected });
@@ -146,3 +147,4 @@ exports.logoutWhatsApp = async (req, res) => {
     res.status(500).json({ error: "Erreur lors de la déconnexion." });
   }
 };
+
