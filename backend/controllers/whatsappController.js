@@ -104,13 +104,15 @@ exports.sendMessage = async (req, res) => {
         return res.status(403).json({ error: "WhatsApp n'est pas connecté. Veuillez scanner le QR Code." });
     }
     try {
-        await client.sendMessage(`${phone}@c.us`, message);
+        const chatId = `${phone}@c.us`; // format international sans +
+        await client.sendMessage(chatId, message, { sendSeen: false }); // ✅ fix
         res.json({ success: true, message: `Message envoyé à ${phone}` });
     } catch (error) {
         console.error("Erreur lors de l'envoi du message:", error);
         res.status(500).json({ error: "Erreur lors de l'envoi du message." });
     }
 };
+
 
 exports.getStatus = (req, res) => {
     res.json({ isConnected: isWhatsAppConnected });
@@ -131,3 +133,4 @@ exports.logoutWhatsApp = async (req, res) => {
         res.status(500).json({ error: "Erreur lors de la déconnexion de WhatsApp." });
     }
 };
+
