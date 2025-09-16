@@ -92,7 +92,7 @@ exports.sendMessage = async (req, res) => {
 
     try {
         const cleanPhone = phone.replace(/\D/g, "");
-        const chatId = `${cleanPhone}@c.us`;
+        const chatId = ${cleanPhone}@c.us;
 
         const chat = await client.getChatById(chatId);
         if (!chat) {
@@ -100,7 +100,7 @@ exports.sendMessage = async (req, res) => {
         }
 
         await chat.sendMessage(message);
-        res.json({ success: true, message: `Message envoyé à ${phone}` });
+        res.json({ success: true, message: Message envoyé à ${phone} });
     } catch (error) {
         console.error("Erreur lors de l'envoi du message:", error);
         res.status(500).json({ error: "Erreur lors de l'envoi du message. Vérifiez le numéro et la connexion." });
