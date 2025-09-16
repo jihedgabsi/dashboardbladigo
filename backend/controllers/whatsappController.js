@@ -4,22 +4,22 @@ const { chromium } = require('playwright');
 
 let whatsappScanQR = null;
 let isWhatsAppConnected = false;
-let isClientInitializing = false; // Variable pour éviter les initialisations multiples
+let isClientInitialized = false;
 
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         browserWSEndpoint: false,
         headless: true,
-        args: [
-            '--no-sandbox', 
-            '--disable-setuid-sandbox',
-            '--disable-gpu', // Désactive l'accélération matérielle pour économiser de la mémoire
-            '--disable-dev-shm-usage', // Important pour les environnements de conteneurs (Docker)
-            '--no-zygote',
-            '--single-process' // Pour les environnements avec peu de mémoire
-        ],
-        browser: 'chromium' // Utilise chromium directement
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        // Fonction personnalisée pour utiliser Playwright
+        async launch(options) {
+            const browser = await chromium.launch({
+                headless: options.headless,
+                args: options.args
+            });
+            return browser;
+        }
     }
 });
 
@@ -31,48 +31,34 @@ client.on('qr', async (qr) => {
 client.on('ready', () => {
     console.log('✅ WhatsApp Web connecté !');
     isWhatsAppConnected = true;
-    isClientInitializing = false;
 });
 
 client.on('disconnected', (reason) => {
     console.log('❌ Déconnecté de WhatsApp:', reason);
     isWhatsAppConnected = false;
-    isClientInitializing = false;
+    isClientInitialized = false;
     whatsappScanQR = null;
-    
-    // Tente de se reconnecter automatiquement
-    console.log('Tentative de reconnexion...');
-    startWhatsApp();
 });
 
-const startWhatsApp = async () => {
-    if (isWhatsAppConnected || isClientInitializing) {
-        console.log("WhatsApp est déjà connecté ou en cours de connexion.");
-        return;
-    }
-    try {
-        isClientInitializing = true;
-        await client.initialize();
-        console.log("🚀 WhatsApp en cours de démarrage...");
-    } catch (err) {
-        console.error("Erreur lors de l'initialisation de WhatsApp:", err);
-        isClientInitializing = false;
-    }
-};
-
-// Fonctions d'export (exports.startWhatsApp, exports.getQRCode, etc.)
-// Les exports restent les mêmes, mais la logique de startWhatsApp a été externalisée pour la réutilisation
-exports.startWhatsApp = (req, res) => {
+// Démarrer WhatsApp Web
+exports.startWhatsApp = async (req, res) => {
     if (isWhatsAppConnected) {
         return res.json({ success: true, message: "✅ WhatsApp est déjà connecté." });
     }
-    if (isClientInitializing) {
+    if (isClientInitialized) {
         return res.json({ success: true, message: "🕒 WhatsApp est en cours de connexion..." });
     }
-    startWhatsApp(); // Appelle la fonction interne
-    res.json({ success: true, message: "🚀 WhatsApp en cours de démarrage..." });
+    try {
+        client.initialize();
+        isClientInitialized = true;
+        res.json({ success: true, message: "🚀 WhatsApp en cours de démarrage..." });
+    } catch (err) {
+        console.error("Erreur lors de l'initialisation de WhatsApp:", err);
+        res.status(500).json({ error: "❌ Échec de l'initialisation de WhatsApp." });
+    }
 };
 
+// Obtenir le QR Code
 exports.getQRCode = (req, res) => {
     if (!whatsappScanQR) {
         return res.status(500).json({ error: "QR Code non disponible. Démarrez WhatsApp avec POST /whatsapp/start" });
@@ -80,6 +66,7 @@ exports.getQRCode = (req, res) => {
     res.json({ qrCode: whatsappScanQR });
 };
 
+// Envoyer un message
 exports.sendMessage = async (req, res) => {
     const { phone, message } = req.body;
     if (!phone || !message) {
@@ -97,10 +84,12 @@ exports.sendMessage = async (req, res) => {
     }
 };
 
+// Vérifier le statut
 exports.getStatus = (req, res) => {
     res.json({ isConnected: isWhatsAppConnected });
 };
 
+// Déconnexion de WhatsApp
 exports.logoutWhatsApp = async (req, res) => {
     if (!isWhatsAppConnected) {
         return res.json({ success: false, message: "WhatsApp n'est pas connecté." });
@@ -108,7 +97,7 @@ exports.logoutWhatsApp = async (req, res) => {
     try {
         await client.logout();
         isWhatsAppConnected = false;
-        isClientInitializing = false;
+        isClientInitialized = false;
         whatsappScanQR = null;
         res.json({ success: true, message: "WhatsApp déconnecté avec succès." });
     } catch (error) {
