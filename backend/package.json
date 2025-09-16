@@ -23,9 +23,11 @@
     "nodemailer": "^7.0.2",
     "bcrypt": "^5.1.1",
     "net": "^1.0.2",
+    "playwright": "^1.51.1",
+    "playwright-extra": "^4.3.6",
+    "playwright-extra-plugin-stealth": "^0.0.1",
     "qrcode": "^1.5.4",
-    "whatsapp-web.js": "^1.26.0",
-    "puppeteer": "^21.3.8"
+    "whatsapp-web.js": "^1.26.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
