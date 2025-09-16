@@ -10,8 +10,14 @@ const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    }
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox', 
+            '--disable-dev-shm-usage',
+            '--single-process', // Pour améliorer la stabilité
+            '--disable-gpu', // Peut aider à réduire les erreurs sur certains systèmes
+        ],
+    },
 });
 
 // --- EVENTS ---
@@ -38,7 +44,8 @@ client.on('disconnected', (reason) => {
     isClientInitialized = false;
     whatsappScanQR = null;
     console.log('🔄 Tentative de reconnexion automatique...');
-    startWhatsApp();
+    // Ajout d'un petit délai avant de tenter la reconnexion pour éviter une boucle rapide
+    setTimeout(() => startWhatsApp(), 5000); 
 });
 
 // --- FUNCTIONS ---
@@ -102,17 +109,24 @@ exports.sendMessage = async (req, res) => {
     }
 
     try {
+        // Validation et nettoyage du numéro de téléphone
         const cleanPhone = phone.replace(/\D/g, "");
+        if (cleanPhone.length < 8) { // Vérification de la longueur minimale d'un numéro de téléphone
+            return res.status(400).json({ error: "Numéro de téléphone invalide." });
+        }
+        
         const chatId = `${cleanPhone}@c.us`;
 
         console.log(`ℹ️ Tentative d'envoi du message à ${chatId}...`);
-        const chat = await client.getChatById(chatId);
-        if (!chat) {
-            console.log(`❌ Chat non trouvé pour le numéro ${phone}`);
-            return res.status(404).json({ error: "Chat non trouvé pour ce numéro." });
+        
+        // Nouvelle méthode : vérification si le numéro est enregistré sur WhatsApp
+        const isRegistered = await client.isRegisteredUser(chatId);
+        if (!isRegistered) {
+            console.log(`❌ Le numéro ${phone} n'est pas un utilisateur WhatsApp valide.`);
+            return res.status(404).json({ error: "Ce numéro n'est pas un utilisateur WhatsApp." });
         }
-
-        await chat.sendMessage(message);
+        
+        await client.sendMessage(chatId, message);
         console.log(`✅ Message envoyé à ${phone}: "${message}"`);
         res.json({ success: true, message: `Message envoyé à ${phone}` });
     } catch (error) {
