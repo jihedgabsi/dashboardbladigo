@@ -1,50 +1,65 @@
 const qrcode = require('qrcode');
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const { chromium } = require('playwright');
 
 let whatsappScanQR = null;
 let isWhatsAppConnected = false;
-let isClientInitializing = false; // Variable pour éviter les initialisations multiples
+let isClientInitializing = false;
 
 const client = new Client({
-    authStrategy: new LocalAuth(),
+    authStrategy: new LocalAuth({ clientId: "flash-driver" }), // session persistante
     puppeteer: {
-        browserWSEndpoint: false,
         headless: true,
         args: [
-            '--no-sandbox', 
+            '--no-sandbox',
             '--disable-setuid-sandbox',
-            '--disable-gpu', // Désactive l'accélération matérielle pour économiser de la mémoire
-            '--disable-dev-shm-usage', // Important pour les environnements de conteneurs (Docker)
+            '--disable-gpu',
+            '--disable-dev-shm-usage',
             '--no-zygote',
-            '--single-process' // Pour les environnements avec peu de mémoire
-        ],
-        browser: 'chromium' // Utilise chromium directement
+            '--single-process'
+        ]
     }
 });
 
+// 🔹 QR Code reçu
 client.on('qr', async (qr) => {
     console.log('QR Code reçu:', qr);
     whatsappScanQR = await qrcode.toDataURL(qr);
 });
 
-client.on('ready', () => {
-    console.log('✅ WhatsApp Web connecté !');
+// 🔹 Authentifié (juste après scan QR)
+client.on('authenticated', () => {
+    console.log('🔑 Authentifié sur WhatsApp !');
     isWhatsAppConnected = true;
     isClientInitializing = false;
 });
 
+// 🔹 Authentification échouée
+client.on('auth_failure', (msg) => {
+    console.error('❌ Échec d\'authentification:', msg);
+    isWhatsAppConnected = false;
+    isClientInitializing = false;
+    whatsappScanQR = null;
+});
+
+// 🔹 Client prêt
+client.on('ready', () => {
+    console.log('✅ WhatsApp Web connecté et prêt !');
+    isWhatsAppConnected = true;
+    isClientInitializing = false;
+});
+
+// 🔹 Déconnexion
 client.on('disconnected', (reason) => {
     console.log('❌ Déconnecté de WhatsApp:', reason);
     isWhatsAppConnected = false;
     isClientInitializing = false;
     whatsappScanQR = null;
-    
-    // Tente de se reconnecter automatiquement
+
     console.log('Tentative de reconnexion...');
     startWhatsApp();
 });
 
+// 🔹 Démarrage WhatsApp
 const startWhatsApp = async () => {
     if (isWhatsAppConnected || isClientInitializing) {
         console.log("WhatsApp est déjà connecté ou en cours de connexion.");
@@ -60,8 +75,8 @@ const startWhatsApp = async () => {
     }
 };
 
-// Fonctions d'export (exports.startWhatsApp, exports.getQRCode, etc.)
-// Les exports restent les mêmes, mais la logique de startWhatsApp a été externalisée pour la réutilisation
+// --- API CONTROLLER EXPORTS ---
+
 exports.startWhatsApp = (req, res) => {
     if (isWhatsAppConnected) {
         return res.json({ success: true, message: "✅ WhatsApp est déjà connecté." });
@@ -69,7 +84,7 @@ exports.startWhatsApp = (req, res) => {
     if (isClientInitializing) {
         return res.json({ success: true, message: "🕒 WhatsApp est en cours de connexion..." });
     }
-    startWhatsApp(); // Appelle la fonction interne
+    startWhatsApp();
     res.json({ success: true, message: "🚀 WhatsApp en cours de démarrage..." });
 };
 
