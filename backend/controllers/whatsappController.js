@@ -105,18 +105,23 @@ exports.sendMessage = async (req, res) => {
   const { phone, message } = req.body;
 
   if (!phone || !message) {
-    return res.status(400).json({ error: "Numéro de téléphone et message requis." });
+    return res.status(400).json({ error: "Numéro et message requis." });
   }
-  if (!isWhatsAppConnected) {
+
+  if (!isWhatsAppConnected || !client.info) {
     return res
       .status(403)
-      .json({ error: "WhatsApp non connecté. Veuillez scanner le QR Code." });
+      .json({ error: "WhatsApp non prêt. Veuillez scanner le QR Code et attendre la connexion complète." });
   }
 
   try {
-    // ✅ format du numéro
-    const cleanPhone = phone.replace(/\D/g, ""); // supprime espaces, +, etc.
+    const cleanPhone = phone.replace(/\D/g, "");
     const chatId = `${cleanPhone}@c.us`;
+
+    const chat = await client.getChatById(chatId);
+    if (!chat) {
+      return res.status(404).json({ error: "Chat non trouvé pour ce numéro." });
+    }
 
     await client.sendMessage(chatId, message);
 
@@ -126,6 +131,7 @@ exports.sendMessage = async (req, res) => {
     res.status(500).json({ error: "Erreur lors de l'envoi du message." });
   }
 };
+
 
 exports.getStatus = (req, res) => {
   res.json({ isConnected: isWhatsAppConnected });
@@ -146,3 +152,4 @@ exports.logoutWhatsApp = async (req, res) => {
     res.status(500).json({ error: "Erreur lors de la déconnexion." });
   }
 };
+
